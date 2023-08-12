@@ -350,7 +350,6 @@ class pwmgpio : public gpio
 	int Mash;
 	int Prediv; //Range of PWM
 	uint64_t Pllfrequency;
-	bool ModulateFromMasterPLL = false;
 	int ModePwm = pwm1pin;
 	generalgpio gengpio;
 

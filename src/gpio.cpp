@@ -875,7 +875,6 @@ int pwmgpio::SetFrequency(uint64_t Frequency)
 	dbg_printf(1, "Frequency=%d, Pllfrequency=%d\n", Frequency, Pllfrequency);
 	Prediv = ComputePrediv(Frequency);
 	//Prediv = 32; // Fixe for now , need investigation if not 32 !!!! FixMe !
-	//Prediv = 125;
 	double Freqresult = (double)Pllfrequency / (double)(Frequency * Prediv);
 	uint32_t FreqDivider = (uint32_t)Freqresult;
 	uint32_t FreqFractionnal = (uint32_t)(4096 * (Freqresult - (double)FreqDivider));
@@ -923,7 +922,8 @@ int pwmgpio::SetPrediv(int predivisor) //Mode should be only for SYNC or a Data 
 
 	//gpioreg[PWM_FIFO]=0xAAAAAAAA;
 
-	gpioreg[PWM_DMAC] = PWMDMAC_ENAB | PWMDMAC_THRSHLD;
+	//gpioreg[PWM_DMAC] = PWMDMAC_ENAB | PWMDMAC_THRSHLD;
+	gpioreg[PWM_DMAC] = PWMDMAC_ENAB | (16 << 8) | (16 << 0);	//immediately request new DMA transfer to avoid underruns
 	usleep(100);
 	gpioreg[PWM_CTL] = PWMCTL_CLRF;
 	usleep(100);
