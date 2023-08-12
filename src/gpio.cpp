@@ -250,7 +250,7 @@ int clkgpio::SetFrequency(double Frequency)
 		uint32_t FreqDivider = (uint32_t)Freqresult;
 		uint32_t FreqFractionnal = (uint32_t)(4096 * (Freqresult - (double)FreqDivider));
 		if ((FreqDivider > 4096) || (FreqDivider < 2))
-			dbg_printf(0, "Frequency out of range\n");
+			dbg_printf(0, "CLK Frequency out of range\n");
 		dbg_printf(1,"DIV/FRAC %u/%u \n", FreqDivider, FreqFractionnal);
 		
 		SetClkDivFrac(FreqDivider, FreqFractionnal);
@@ -871,12 +871,16 @@ uint64_t pwmgpio::GetPllFrequency(int PllNo)
 
 int pwmgpio::SetFrequency(uint64_t Frequency)
 {
-	Prediv = 32; // Fixe for now , need investigation if not 32 !!!! FixMe !
+
+	dbg_printf(1, "Frequency=%d, Pllfrequency=%d\n", Frequency, Pllfrequency);
+	Prediv = ComputePrediv(Frequency);
+	//Prediv = 32; // Fixe for now , need investigation if not 32 !!!! FixMe !
+	//Prediv = 125;
 	double Freqresult = (double)Pllfrequency / (double)(Frequency * Prediv);
 	uint32_t FreqDivider = (uint32_t)Freqresult;
 	uint32_t FreqFractionnal = (uint32_t)(4096 * (Freqresult - (double)FreqDivider));
 	if ((FreqDivider > 4096) || (FreqDivider < 2))
-		dbg_printf(1, "Frequency out of range\n");
+		dbg_printf(1, "PWM Frequency out of range\n");
 	dbg_printf(1, "PWM clk=%d / %d\n", FreqDivider, FreqFractionnal);
 	clk.gpioreg[PWMCLK_DIV] = 0x5A000000 | ((FreqDivider) << 12) | FreqFractionnal;
 
@@ -894,14 +898,24 @@ void pwmgpio::SetMode(int Mode)
 		ModePwm = Mode;
 }
 
+int pwmgpio::ComputePrediv(uint64_t Frequency)
+{
+
+	if (Frequency==625)
+		return 125;
+	else
+		return 32;
+}
+
 int pwmgpio::SetPrediv(int predivisor) //Mode should be only for SYNC or a Data serializer : Todo
 {
 	Prediv = predivisor;
-	if (Prediv > 32)
+/*	if (Prediv > 32)
 	{
 		dbg_printf(1, "PWM Prediv is max 32\n");
 		Prediv = 2;
 	}
+*/
 	dbg_printf(1, "PWM Prediv %d\n", Prediv);
 	gpioreg[PWM_RNG1] = Prediv; // 250 -> 8KHZ
 	usleep(100);
@@ -980,6 +994,7 @@ int pcmgpio::ComputePrediv(uint64_t Frequency)
 
 int pcmgpio::SetFrequency(uint64_t Frequency)
 {
+	dbg_printf(1, "Frequency=%d, Pllfrequency=%d\n", Frequency, Pllfrequency);
 	Prediv = ComputePrediv(Frequency);
 	double Freqresult = (double)Pllfrequency / (double)(Frequency * Prediv);
 	uint32_t FreqDivider = (uint32_t)Freqresult;

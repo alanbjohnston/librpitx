@@ -364,6 +364,7 @@ class pwmgpio : public gpio
 	void SetMode(int Mode);
 	void enablepwm(int gpio, int PwmNumber);
 	void disablepwm(int gpio);
+	int ComputePrediv(uint64_t Frequency);
 };
 
 //******************************* PCM GPIO (I2S) ***********************************

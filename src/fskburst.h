@@ -5,12 +5,17 @@
 #include "dma.h"
 #include "gpio.h"
 
-class fskburst:public bufferdma,public clkgpio,public pwmgpio,public pcmgpio
+#define SYNCWITHPWM
+
+#ifdef SYNCWITHPWM
+class fskburst:public bufferdma,public clkgpio,public pwmgpio
+#else	       
+class fskburst:public bufferdma,public clkgpio,public pcmgpio
+#endif	       
 {
 	protected:
 	float freqdeviation;
 	uint32_t Originfsel;
-	bool syncwithpwm;
 	dma_cb_t *lastcbp;
 	size_t SR_upsample=0;
 	size_t Ramp=0;

@@ -9,12 +9,17 @@
 #define MODE_IQ 0
 #define MODE_FREQ_A 1
 
-class iqdmasync:public bufferdma,public clkgpio,public pwmgpio,public pcmgpio
+#define SYNCWITHPWM
+
+#ifdef SYNCWITHPWM
+class iqdmasync:public bufferdma,public clkgpio,public pwmgpio
+#else
+class iqdmasync:public bufferdma,public clkgpio,public pcmgpio
+#endif		
 {
       
 	protected:
 	uint64_t tunefreq;
-	bool syncwithpwm;
 	dsp mydsp;
 	uint32_t	Originfsel; //Save the original FSEL GPIO
 	uint32_t SampleRate;

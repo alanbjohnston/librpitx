@@ -36,18 +36,14 @@ iqdmasync::iqdmasync(uint64_t TuneFrequency,uint32_t SR,int Channel,uint32_t Fif
 	clkgpio::SetCenterFrequency(TuneFrequency,SampleRate); // Write Mult Int and Frac : FixMe carrier is already there
 	clkgpio::SetFrequency(0);
 	clkgpio::enableclk(4);
-	syncwithpwm=false;
-	
-	if(syncwithpwm)
-	{
+
+#ifdef SYNCWITHPWM	
 		pwmgpio::SetPllNumber(clk_plld,1);
 		pwmgpio::SetFrequency(SampleRate);
-	}
-	else
-	{
+#else		
 		pcmgpio::SetPllNumber(clk_plld,1);
 		pcmgpio::SetFrequency(SampleRate);
-	}
+#endif		
 	
 	mydsp.samplerate=SampleRate;
    
@@ -92,7 +88,11 @@ void iqdmasync::SetDmaAlgo()
 			cbp++;
 	
 			//@3 Delay
-			SetEasyCB(cbp,samplecnt*registerbysample,syncwithpwm?dma_pwm:dma_pcm,1);
+#ifdef SYNCWITHPWM	
+			SetEasyCB(cbp,samplecnt*registerbysample,dma_pwm,1);
+#else
+			SetEasyCB(cbp,samplecnt*registerbysample,dma_pcm,1);
+#endif			
 			//dbg_printf(1,"cbp : sample %x src %x dest %x next %x\n",samplecnt,cbp->src,cbp->dst,cbp->next);
 			cbp++;
 			

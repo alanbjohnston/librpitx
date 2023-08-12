@@ -27,19 +27,15 @@ fskburst::fskburst(uint64_t TuneFrequency, float SymbolRate, float Deviation, in
 	clkgpio::SetCenterFrequency(TuneFrequency, Deviation*10); // Write Mult Int and Frac : FixMe carrier is already there
 	clkgpio::SetFrequency(0);
 	disableclk(4);
-	syncwithpwm = false;
 	Ramp = SR_upsample * RatioRamp; //Ramp time = 10%
 
-	if (syncwithpwm)
-	{
-		pwmgpio::SetPllNumber(clk_plld, 1);
-		pwmgpio::SetFrequency(SymbolRate * (float)SR_upsample);
-	}
-	else
-	{
-		pcmgpio::SetPllNumber(clk_plld, 1);
-		pcmgpio::SetFrequency(SymbolRate * (float)SR_upsample);
-	}
+#ifdef SYNCWITHPWM	
+	pwmgpio::SetPllNumber(clk_plld, 1);
+	pwmgpio::SetFrequency(SymbolRate * (float)SR_upsample);
+#else
+	pcmgpio::SetPllNumber(clk_plld, 1);
+	pcmgpio::SetFrequency(SymbolRate * (float)SR_upsample);
+#endif	
 
 	//Should be obligatory place before setdmaalgo
 	Originfsel = clkgpio::gengpio.gpioreg[GPFSEL0];
@@ -62,14 +58,11 @@ void fskburst::SetDmaAlgo()
 	// We must fill the FIFO (PWM or PCM) to be Synchronized from start
 	// PWM FIFO = 16
 	// PCM FIFO = 64
-	if (syncwithpwm)
-	{
+#ifdef SYNCWITHPWM	
 		SetEasyCB(cbp++, 0, dma_pwm, 16 + 1);
-	}
-	else
-	{
+#else
 		SetEasyCB(cbp++, 0, dma_pcm, 64 + 1);
-	}
+#endif
 
 	SetEasyCB(cbp++, buffersize * registerbysample - 2, dma_fsel, 1); //Enable clk
 
@@ -80,7 +73,11 @@ void fskburst::SetDmaAlgo()
 		SetEasyCB(cbp++, samplecnt * registerbysample, dma_pllc_frac, 1); //FReq
 
 		// Delay
-		SetEasyCB(cbp++, samplecnt * registerbysample, syncwithpwm ? dma_pwm : dma_pcm, 1);
+#ifdef SYNCWITHPWM	
+		SetEasyCB(cbp++, samplecnt * registerbysample, dma_pwm, 1);
+#else
+		SetEasyCB(cbp++, samplecnt * registerbysample, dma_pcm, 1);
+#endif		
 	}
 	lastcbp = cbp;
 
