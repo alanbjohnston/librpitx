@@ -7,7 +7,7 @@
 
 #define SYNCWITHPWM
 
-#ifdef SYNCWITHPWM
+//#ifdef SYNCWITHPWM
 class fskburst:public bufferdma,public clkgpio,public pwmgpio
 #else	       
 class fskburst:public bufferdma,public clkgpio,public pcmgpio
