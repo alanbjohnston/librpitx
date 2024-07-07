@@ -5,9 +5,9 @@
 #include "dma.h"
 #include "gpio.h"
 
-#define SYNCWITHPWM
+//#define SYNCWITHPWM
 
-//#ifdef SYNCWITHPWM
+#ifdef SYNCWITHPWM
 class fskburst:public bufferdma,public clkgpio,public pwmgpio
 #else	       
 class fskburst:public bufferdma,public clkgpio,public pcmgpio
