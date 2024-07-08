@@ -9,7 +9,7 @@
 #define MODE_IQ 0
 #define MODE_FREQ_A 1
 
-//#define SYNCWITHPWM
+#define SYNCWITHPWM
 
 #ifdef SYNCWITHPWM
 class iqdmasync:public bufferdma,public clkgpio,public pwmgpio
